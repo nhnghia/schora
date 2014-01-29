@@ -1,0 +1,4 @@
+schora
+======
+
+Symbolic Choreography Analysis
