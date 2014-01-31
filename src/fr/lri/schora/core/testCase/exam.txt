@@ -1,4 +1,4 @@
-/*
+
 This script show our examples in the paper submitted to SCC 2013.
  - example1: 
  - example2:
