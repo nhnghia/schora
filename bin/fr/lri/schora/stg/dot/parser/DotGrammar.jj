@@ -1,0 +1,81 @@
+/**
+ * JavaCC template file created by SF JavaCC plugin 1.5.17+ wizard for JavaCC 1.5.0+
+ */options{  JDK_VERSION = "1.5";  static = false;}PARSER_BEGIN(STGReader)package fr.lri.schora.stg.dot.parser;
+
+import fr.lri.schora.stg.dot.DOT;
+import java.util.*;
+import fr.lri.schora.util.parser.*;
+public class STGReader
+{
+    
+}
+
+PARSER_END(STGReader)
+
+TOKEN_MGR_DECLS : {
+	static int commentNesting = 0;}
+SKIP : /* Ignoring spaces/tabs/newlines*/{	  " "	| "\r"	| "\t"	| "\n"
+	| <"//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
+}
+MORE:{
+	< "/*" > {commentNesting++;} : IN_COMMENT}<IN_COMMENT> MORE:{
+  	<~[]>}
+<IN_COMMENT> SKIP :
+{
+	  < "/*" > {commentNesting++;} 
+	| < "*/" > {commentNesting--;
+	    if(commentNesting == 0) {
+	        SwitchTo(DEFAULT);
+	    }
+	}
+}
+
+
+TOKEN : /* OPERATORS */{	  < LABEL   : "label" >	| < CONNECT : "->" >
+	| < END     : ";" >
+	| < LPARAM  : "[" >
+	| < RPARAM  : "]" >
+	| < EQUAL   : "=" >
+	| < QUOTE   : "\"" >
+}TOKEN :{  	  < IDENT :  (["A"-"Z"] | ["a"-"z"] | ["0"-"9"] | "_")+ >
+	| < STRING :  "\"" (~["\""])* "\"" >}
+DOT parser() :
+{
+  DOT dot = new DOT();
+  Token t1, t2;
+  ParserToken s = null;}{
+  	(
+  	  t1 = < IDENT >
+  	  (
+  	    < END >
+  	    {
+  	   		dot.states.add(t1.image);
+  	   		dot.stateLabels.add(t1.image);
+  	    }
+  	  | 
+  	    s = getLabel() < END > 
+  	    {
+  	   		dot.states.add(t1.image);
+  	   		dot.stateLabels.add(s.script);  	    }
+  	  |
+  	    < CONNECT > t2 = < IDENT > s = getLabel() < END >
+  	    {
+  	    	dot.startStates.add(t1.image);
+  	    	dot.endStates.add(t2.image);
+  	    	dot.labels.add(s);  	     }
+  	   )
+  	)*
+  	{
+  	  return dot;  	}}
+
+ParserToken getLabel():
+{
+  Token t;
+}
+{
+  	 < LPARAM > < LABEL > < EQUAL > t = < STRING >  < RPARAM >
+	 {	
+	    String s = t.image;
+  	    s = s.substring(1, s.length()-1);
+  	    return new ParserToken(t.beginLine, t.beginColumn+1, s);	 } 
+}

@@ -1,0 +1,49 @@
+// ********************
+// Train Station Services choreography
+// Ref: Salaun, G., Bultan, T. and Roohi, N.: Realizability of Choreographies Using Process Algebra Encodings. 
+//      In: IEEE Transition on Service Computing, vol. 5, no. 3, pp. 290-304. 2012
+// ********************
+DECLARATIONS
+    component chor chorD
+        request[c,t] ; info[t,a] ; infoAvail[a,t] ; itinerary[a,t] ; book[t,b] ; ack[b,t] ; 
+        (result[t,c] | (invoice[b,c] + skip))
+    end component
+    
+    component customer chorD
+        request[c,t]! ; (result[t,c]? | (invoice[b,c]? + skip))
+    end component
+    
+    component booking chorD
+        book[t,b]? ; ack[b,t]! ; (invoice[b,c]! + skip)
+    end component
+
+    component train chorD
+        request[c,t]? ; info[t,a]! ; infoAvail[a,t]? ; itinerary[a,t]? ; book[t,b]! ; ack[b,t]? ; result[t,c]!
+    end component
+
+    component availability chorD
+        info[t,a]? ; infoAvail[a,t]! ; itinerary[a,t]!
+    end component
+
+	//impl is the composition of customer, train, booking and availability
+    component impl chorD
+        customer || train || booking || availability
+    end component
+
+COMMANDS
+    showSTG chor //customer booking train availability impl
+    
+    //show statistic of STG
+    showStat chor //customer booking train availability impl
+	
+	//get a realizable STG of chor
+	showRealizableSTG chor SYNC //other communication modes: ASYNC_SENDER, ASYNC_RECEIVER and ASYNC_DISJOINT
+	
+	//projection chor on each of its roles
+	projection chor SYNC
+	
+    showTime
+    
+    //conformance checking
+    conformance impl chor
+    showTime 

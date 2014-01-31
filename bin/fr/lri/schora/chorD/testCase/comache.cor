@@ -1,0 +1,15 @@
+request[c,f].<url> ; analyze[f,ra].url ; result[ra,f].<code> ; (
+	[code!=200] |> error[ra,c].code
+	+
+	[code=200] |> ( checking[ra,rd].url ; result[rd,ra].<code>;
+		(
+			[code!=200] |> (handleError[rd,erh].code ; error[erh,c].code)
+			+
+			[code=200] |> (
+				readFile[rd,frh].url ; response[frh,c].<file>
+				|
+				requestLog[ra,l].url
+			)
+		)
+	)
+)

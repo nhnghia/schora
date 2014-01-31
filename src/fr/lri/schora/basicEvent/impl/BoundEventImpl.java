@@ -1,0 +1,44 @@
+/**
+ */
+package fr.lri.schora.basicEvent.impl;
+
+import fr.lri.schora.basicEvent.BasicEventPackage;
+import fr.lri.schora.basicEvent.BoundEvent;
+
+import org.eclipse.emf.ecore.EClass;
+
+/**
+ * <!-- begin-user-doc -->
+ * An implementation of the model object '<em><b>Bound Event</b></em>'.
+ * <!-- end-user-doc -->
+ * <p>
+ * </p>
+ *
+ * @generated
+ */
+public abstract class BoundEventImpl extends EventImpl implements BoundEvent {
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	protected BoundEventImpl() {
+		super();
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	protected EClass eStaticClass() {
+		return BasicEventPackage.Literals.BOUND_EVENT;
+	}
+
+	public String toString(){
+		return "()";
+	}
+	
+	
+} //BoundEventImpl

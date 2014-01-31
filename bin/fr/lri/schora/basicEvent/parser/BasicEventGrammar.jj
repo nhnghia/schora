@@ -1,0 +1,131 @@
+/**
+ * JavaCC template file created by SF JavaCC plugin 1.5.17+ wizard for JavaCC 1.5.0+
+ */options{  JDK_VERSION = "1.5";  static = false;}PARSER_BEGIN(EventReader)package fr.lri.schora.basicEvent.parser;
+import fr.lri.schora.expr.*;
+import fr.lri.schora.basicEvent.*;
+import java.io.*;
+import java.util.*;
+public class EventReader
+{
+  	public static Event parser(String script) throws fr.lri.schora.util.parser.ParserException{
+  	   return EventReader.parser(script, 0, 0);
+  	}
+  /**
+	 * parse a script which is a paragraph in a document
+	 * @param script
+	 * @param shiftLine: beginLine of the paragraph
+	 * @param shiftColumn: beginColumn of the paragraph
+	 * @return
+	 * @throws fr.lri.tools.parser.ParserException
+	 */
+	public static Event parser(String script, int shiftLine, int shiftColumn) throws fr.lri.schora.util.parser.ParserException{
+		try{
+			StringReader f = new StringReader(script);
+			EventReader parser = new EventReader(f);
+			Event dot = parser.parser();
+			return dot;
+		}catch (ParseException ex){
+			Token ct = ex.currentToken;
+			java.util.List<String> expectedImages = new ArrayList<String>();
+			for (int i=0; i< ex.expectedTokenSequences.length; i++){
+				for (int j=0; j< ex.expectedTokenSequences[i].length; j++){
+					expectedImages.add(ex.tokenImage[ex.expectedTokenSequences[i][j]]);
+				}
+			}
+			throw new fr.lri.schora.util.parser.ParserException(ct.beginLine + shiftLine, ct.endLine + shiftLine, ct.beginColumn+shiftColumn, ct.endColumn+shiftColumn, ct.next.image, expectedImages);
+		}
+	}
+}
+
+PARSER_END(EventReader)
+
+TOKEN_MGR_DECLS : {
+	static int commentNesting = 0;}
+SKIP : /* Ignoring spaces/tabs/newlines*/{	  " "	| "\r"	| "\t"	| "\n"
+	| <"//" (~["\n"])* "\n">
+}
+MORE:{
+	< "/*" > {commentNesting++;} : IN_COMMENT}<IN_COMMENT> MORE:{
+  	<~[]>}
+<IN_COMMENT> SKIP :
+{
+	  < "/*" > {commentNesting++;} 
+	| < "*/" > {commentNesting--;
+	    if(commentNesting == 0) {
+	        SwitchTo(DEFAULT);
+	    }
+	}
+}
+
+
+TOKEN : /* OPERATORS */{	  < INTERACTION : "." >	| < RECEPTION   : "?" >
+	| < SENDING     : "!" >	| < BEGIN_BOUND : "<" >
+	| < END_BOUND   : ">" >
+	| < BEGIN_OBJ   : "[" >
+	| < END_OBJ     : "]" >
+	| < COMMA       : "," >}
+TOKEN :{  	  < IDENT : (["A"-"Z"] | ["a"-"z"] | ["0"-"9"] | "_")+ >
+}
+< * > TOKEN :
+{
+	  < UNEXPECTED_CHAR : ~[] >
+}
+Event parser() :
+{
+  Token t1, t2,t3,t4 = null;
+  int eventType = 1;
+  boolean isBound = false;
+  boolean hasVariable = false;
+}{
+  	t1 = < IDENT >
+  	< BEGIN_OBJ >
+  	t2 = < IDENT >
+  	< COMMA >
+  	t3 = < IDENT >
+  	< END_OBJ >
+  	(
+  	  < INTERACTION >  	  {
+  	    eventType = 1;  	  }
+  	| < SENDING >  	  {  	    eventType = 2;
+  	  }
+  	 | < RECEPTION >  	 {
+  	   eventType = 3;   	 }  	)?
+  	(
+  	  < BEGIN_BOUND >
+  	  t4 = < IDENT >
+  	  < END_BOUND >
+  	  {
+  	    isBound = true;
+  	    hasVariable = true;  	  }
+  	|
+  	  t4 = < IDENT >
+  	  {
+  	    isBound = false;
+  	    hasVariable = true;  	  }  	)?
+  	< EOF >
+  	{
+  	  BasicEvent e;
+  	  BasicEventFactory fac = BasicEventFactory.eINSTANCE;
+  	  if (eventType == 1)  	  {  	  	if (isBound) 
+  	  		e = fac.createBoundInteraction();
+  	  	else
+  	  		e = fac.createFreeInteraction();
+  	  }
+  	  else if (eventType == 2)  	  {		if (isBound) 
+  	  		e = fac.createBoundSending();
+  	  	else
+  	  		e = fac.createFreeSending();
+  	  }
+  	  else
+  	  		e = fac.createReception();
+
+	  e.setOperationName(t1.image);
+	  e.setSender(t2.image);
+	  e.setReceiver(t3.image);
+
+	  if (hasVariable)	  {
+	     Variable v = ExprFactory.eINSTANCE.createVariable();
+	     v.setName(t4.image);
+	     e.setVariable(v);	  }
+  	  
+  	  return e;  	}}

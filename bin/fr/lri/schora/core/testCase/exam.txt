@@ -1,0 +1,72 @@
+/*
+This script show our examples in the paper submitted to SCC 2013.
+ - example1: 
+ - example2:
+ - example3: is running example of the paper 
+*/
+
+//We declare the components here. They respect DOT language.
+DECLARATIONS
+	component example1 STG
+		// list of states
+		1; 2; 3; 4;
+		// list of transitions
+		1 -> 2 [label="o1[a,c].<x>"];
+		2 -> 3 [label="[x>0] o2[a,b]."];
+		3 -> 4 [label ="[x<0] o3[c,d]."];
+	end component
+	
+	component example2 STG
+		1; 2; 3; 4; 5;
+		1 -> 2 [label="o1[b,d].<x>"];
+		2 -> 3 [label="o2[d,a].x"];
+		3 -> 4 [label="o3[a,c].x"];
+		4 -> 5 [label="[x>0] o4[a,b]."];
+		4 -> 5 [label="[x<=0] o5[c,d]."];
+	end component
+	
+	component example3 STG
+		0; 1; 2; 3; 4; 5; 6; 7; 8;
+		0 -> 1 [label="req[b,v]."];
+        1 -> 2 [label="rep[v,b]."];
+        2 -> 3 [label="req[b,v]."];
+        3 -> 2 [label="rep[v,b]"];
+        2 -> 4 [label="abort[v,b]."];
+        2 -> 5 [label="buy[b,v].<x1>"];
+        5 -> 6 [label="sell[v,w].x1"];
+        6 -> 7 [label="rep[w,v].<x2>"];
+        7 -> 8 [label="[x2=OK] ship[w,s].x1"];
+        8 -> 4 [label="confirm[v,b]."];
+        7 -> 4 [label="[x2!=OK] sold[v,b]."];	
+    end component
+
+	component ex4 chorD
+		Request[c,s].x_1 ; [x_1+2 >= 5] |> LivrExp[s,c] + [x_1 <5] |> Livraison[s,c] ! <x>
+	end component
+	
+	component comanche chorD
+		request[c,f].<url> ; analyze[f,ra].url ; result[ra,f].<code> ; (
+			[code!=200] |> error[ra,c].code
+			+
+			[code=200] |> ( checking[ra,rd].url ; result[rd,ra].<code>;
+				(
+					[code!=200] |> (handleError[rd,erh].code ; error[erh,c].code)
+					+
+					[code=200] |> (
+						readFile[rd,frh].url ; response[frh,c].<file>
+						|
+						requestLog[ra,l].url
+					)
+				)
+			)
+		)
+	end component
+COMMANDS
+	showTime
+//	showSTG ex4 comanche
+//	showReachableSTG example1
+//	showSTG example2
+//	showRealizableSTG example3 SYNC
+	project example3 SYNC
+//	showTime
+//End of Script
