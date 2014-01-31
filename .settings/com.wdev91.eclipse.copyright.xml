@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project>
+	<owner>nhnghia</owner>
+	<copyright><![CDATA[ This code is distributed under GPL v2 licence.
+ 
+ This code is provided solely "as is". 
+ There is no warranty or other guarantee of fitness of this code.
+ The author disclaims all responsibility and liability 
+ with respect to this code's usage
+ or its effect upon hardware or computer systems.
+ 
+ author: Huu-Nghia Nguyen
+ email : nhnghia@me.com]]></copyright>
+	<header contentId="org.eclipse.mylyn.wikitext" postBlankLines="0" lineFormat="false" preserveFirstLine="false">
+		<beginLine><![CDATA[/*]]></beginLine>
+		<linePrefix><![CDATA[]]></linePrefix>
+		<endLine><![CDATA[*/]]></endLine>
+	</header>
+</project>
