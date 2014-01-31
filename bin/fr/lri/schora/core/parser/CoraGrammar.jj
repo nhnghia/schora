@@ -1,191 +1,0 @@
-/**
- * JavaCC template file created by SF JavaCC plugin 1.5.17+ wizard for JavaCC 1.5.0+
- */options{  JDK_VERSION = "1.5";  static = false;}PARSER_BEGIN(SchoraReader)package fr.lri.schora.core.parser;
-
-import fr.lri.schora.util.parser.ParserToken;
-import fr.lri.schora.define.*;
-import fr.lri.schora.core.*;
-import fr.lri.schora.core.cmd.*;
-import java.util.*;
-public class SchoraReader
-{
-}
-
-PARSER_END(SchoraReader)
-
-TOKEN_MGR_DECLS : {
-	static int commentNesting = 0;}
-SKIP : /* Ignoring spaces/tabs/newlines*/{	  " "	| "\r"	| "\t"	| "\n"
-	| <"//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
-}
-MORE:{
-	< "/*" > {commentNesting++;} : IN_COMMENT}<IN_COMMENT> MORE:{
-  	<~[]>}
-<IN_COMMENT> SKIP :
-{
-	  < "/*" > {commentNesting++;} 
-	| < "*/" > {commentNesting--;
-	    if(commentNesting == 0) {
-	        SwitchTo(DEFAULT);
-	    }
-	}
-}
-
-
-TOKEN : /* OPERATORS */{	  < DECLARATIONS : "DECLARATIONS" >	| < COMPONENT    : "component" >
-	| < CHORD        : "chorD" >: IN_COMPONENT
-	| < STG          : "STG" >  : IN_COMPONENT	| < COMMANDS     : "COMMANDS" >}
-TOKEN:
-{
-  	< SHOW_STG     : "showSTG" >
- 	| < SHOW_TIME  : "showTime" >
- 	| < SHOW_STAT  : "showStat" >
- 	| < PROJECTION : "projection">
- 	| < CONFORMANCE: "conformance">
- 	| < SHOW_REACHABLE_STG : "showReachableSTG" >
- 	| < SHOW_REALIZABLE_STG: "showRealizableSTG" >
-
- 	/*communication model*/
- 	| < SYNC          : "SYNC" >
- 	| < ASYNC_SENDER  : "ASYNC_SENDER" >
- 	| < ASYNC_RECEIVER: "ASYNC_RECEIVER" >
- 	| < ASYNC_DISJOINT: "ASYNC_DISJOINT" >} 
-
-< IN_COMPONENT > TOKEN:
-{	  < COM_END :   "end component" > : DEFAULT
-	| < SCRIPT : ~[] >
-}
-
-TOKEN :{  < IDENT : (["A"-"Z"] | ["a"-"z"] | ["0"-"9"] | "_")+ >
-}
-< * > TOKEN :
-{
-	< UNEXPECTED_CHAR : ~[] >
-}
-MyCoraDocument document() :
-{
-  List<MyParserComponent > lst;
-  List<Command > cmds;}{
-  	lst = components()
-  	cmds = commands()
-  	< EOF >
-  	{
-  	  return new MyCoraDocument(lst, cmds);  	}}
-
-List <MyParserComponent > components() :{
-  Token type, name, text;
-  List<MyParserComponent > lst = new ArrayList<MyParserComponent >();
-  String spec="";
-  int line, col;
-  line = col = -1;
-}{
-	< DECLARATIONS >  (
-    < COMPONENT >
-    name = < IDENT >
-    (type = <CHORD > | type = < STG >)
-    (	    text = < SCRIPT >
-	    {
-	      if (line == -1)	      {			line = text.beginLine;
-			col = text.beginColumn;
-	      }
-	      spec += text.image; 	    }
-	)*
-    < COM_END >
-    {
-      lst.add(new MyParserComponent(name.image, type.image, new ParserToken(line, col, spec)));
-      spec = "";
-      line = -1;    }  )*  {
-    return lst;  }
-}
-
-List<Command > commands():
-{
-  Token t, t2, t3;
-  Command cmd;
-  List<Command > cmdLst = new ArrayList<Command >();
-  List<String > lst = new ArrayList<String >();
-  COMMUNICATION_MODEL comod = COMMUNICATION_MODEL.SYNC;}{  < COMMANDS >
-  	(    
-	t= < SHOW_TIME >
-	{
-		cmd = new ShowTimeCmd(t.image);
-		cmdLst.add(cmd);	}
-	|
-	t= < SHOW_STAT >
-	lst = getStringList()
-	{
-		cmd = new ShowStatCmd(t.image);
-		cmd.parameters.addAll(lst);
-		cmdLst.add(cmd);
-	}
-    | 
-	t= < SHOW_STG >
-	lst = getStringList()
-	{
-		cmd = new ShowSTGCmd(t.image);
-		cmd.parameters.addAll(lst);
-		cmdLst.add(cmd);
-	}
-	|
-	t= < SHOW_REACHABLE_STG >
-	lst = getStringList()
-	{
-		cmd = new GetReachableSTGCmd(t.image);
-		cmd.parameters.addAll(lst);
-		cmdLst.add(cmd);
-	}
-	|
-	t= < SHOW_REALIZABLE_STG >
-	lst = getStringList()
-	comod = getCommunicationModel()
-	{
-		cmd = new GetRealizableSTGCmd(t.image);
-		cmd.parameters.addAll(lst);
-		(		  (GetRealizableSTGCmd)cmd).communicationModel = comod;
-		cmdLst.add(cmd);
-	}
-	|
-	t= < PROJECTION >
-	lst = getStringList()
-	comod = getCommunicationModel()
-	{
-		ProjectionCmd pCmd = new ProjectionCmd(t.image);
-		pCmd.parameters.addAll(lst);
-		pCmd.communicationModel = comod;
-		cmdLst.add(pCmd);
-	}
-	|
-	t= < CONFORMANCE >
-	t2 = < IDENT >
-	t3 = < IDENT >
-	{
-		ConformanceCmd cCmd = new ConformanceCmd(t.image);
-		cCmd.parameters.add(t2.image);
-		cCmd.parameters.add(t3.image);
-		cmdLst.add(cCmd);
-	}
-	)*
-  	{
-    	return cmdLst;  	}}
-
-List<String > getStringList():
-{
-  List<String > lst = new ArrayList<String >();
-  Token t;}
-{
-  (
-    t = < IDENT >
-    {	    lst.add(t.image);
-  	}  )+
-  {
-    return lst;  }}
-
-
-COMMUNICATION_MODEL getCommunicationModel():
-{}
-{	  < SYNC > {return COMMUNICATION_MODEL.SYNC;}
-	| < ASYNC_SENDER > {return COMMUNICATION_MODEL.ASYNC_SENDER;}
-	| < ASYNC_RECEIVER > {return COMMUNICATION_MODEL.ASYNC_RECEIVER;}
-	| < ASYNC_DISJOINT > {return COMMUNICATION_MODEL.ASYNC_DISJOINT;}
-}
-
