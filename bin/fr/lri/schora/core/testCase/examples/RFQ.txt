@@ -1,0 +1,57 @@
+//------------------------------------------------------------------------------
+// This code is distributed under GPL v2 licence.
+// 
+// This code is provided solely "as is". 
+// There is no warranty or other guarantee of fitness of this code.
+// The author disclaims all responsibility and liability 
+// with respect to this code's usage
+// or its effect upon hardware or computer systems.
+// 
+// author: Huu-Nghia Nguyen
+// email : nhnghia@me.com
+//------------------------------------------------------------------------------
+
+// ****************************************
+// Request For Quotation (RFQ) choreography
+// REF: Kazhamiakin, R., Pistore,M.: Choreography Conformance Analysis: Asynchronous Communications andInformationAlignment. 
+//      In:Bravetti,M., Nunez, M., Zavattaro, G. (eds.) WS-FM2006. LNCS, vol. 4184, pp. 227-241. Springer,Heidelberg (2006)
+// ****************************************
+DECLARATIONS
+    component chor chorD
+        request[b,s] ; offer[s,b] ;
+           (skip 
+              + 
+            accept[b,s] ; confirm[s,b] ; orderShipment[s,h] ; confirmShipment[h,s])
+    end component
+    
+    component buyer chorD
+        request[b,s]! ; offer[s,b]? ; (accept[b,s]! ; confirm[s,b]? + skip)
+    end component
+
+    component seller chorD
+        request[b,s]? ; offer[s,b]! ; 
+           (skip + accept[b,s]? ; confirm[s,b]! ; orderShipment[s,h]! ; confirmShipment[h,s]?)
+    end component
+    
+    component shipper chorD
+        (orderShipment[s,h]? ; confirmShipment[h,s]! + skip)
+    end component
+
+	//composition
+    component impl chorD
+        buyer || seller || shipper
+    end component
+
+COMMANDS
+	//display STG graphics
+    showSTG chor buyer seller shipper impl
+    
+    //display statistics
+    showStat chor impl
+	
+	showRealizableSTG chor SYNC
+	projection chor SYNC
+	//display current time of the system, help to calculate execution time of (a) command(s)
+    showTime
+    conformance impl chor
+    showTime

@@ -60,7 +60,7 @@ public class OrImpl extends BinaryConditionImpl implements Or {
 
 	@Override
 	public String toString(){
-		return String.format("(%s) OR (%s)", expr.toString(), expr2.toString());
+		return String.format("(%s) or (%s)", expr.toString(), expr2.toString());
 	}
 	
 	@Override

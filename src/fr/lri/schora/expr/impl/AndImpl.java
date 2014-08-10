@@ -60,7 +60,7 @@ public class AndImpl extends BinaryConditionImpl implements And {
 
 	@Override
 	public String toString(){
-		return String.format("(%s) AND (%s)", expr.toString(), expr2.toString());
+		return String.format("(%s) and (%s)", expr.toString(), expr2.toString());
 	}
 	
 	@Override

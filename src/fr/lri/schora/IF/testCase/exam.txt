@@ -1,0 +1,14 @@
+
+DECLARATIONS
+	component a chorD
+		request[a,b]!<x_1> ; response[b,a] ? <x>
+	end component
+	
+	component b chorD
+		request[a,b]?<x_1> ; response[b,a] ! <x>
+	end component
+	
+	component comanche chorD
+		request[a,b].<x> ; response[b,a].x
+	end component
+COMMANDS

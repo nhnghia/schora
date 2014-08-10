@@ -14,6 +14,7 @@ package fr.lri.schora.chorD.testCase;
 
 import org.junit.Test;
 
+import fr.lri.schora.IF.STG2IF;
 import fr.lri.schora.chorD.ChorD;
 import fr.lri.schora.stg.STG;
 import fr.lri.schora.util.parser.ParserException;
@@ -27,8 +28,9 @@ public class TestChorD {
 		ChorD chor = ChorD.parser(str);
 		System.out.println(chor.toString());
 		
-		STG s = ChorD.translate2STG(chor);
-		System.out.println(s.toDotFormat());
+		STG s =  ChorD.translate2STG(chor);
+		STG2IF tran = new STG2IF();
+		System.out.println(tran.toIFSpecification(s));
 	}
 
 }
